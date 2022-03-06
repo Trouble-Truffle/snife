@@ -1,4 +1,4 @@
-# Revision history for brackhs
+# Revision history for snife
 
 ## 0.1.0.0 -- YYYY-mm-dd
 
