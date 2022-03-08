@@ -19,6 +19,7 @@ class Zipper z where
 
   shift :: Direction z -> z a -> z a
   neighbors :: z a -> [a]
+  flatten :: z a -> [a] -- Turn the content and focus into just one list
 
 -- Looped Zip <Begin> -----------------------------------
 data LoopedZip a = LoopedZip {
@@ -43,9 +44,12 @@ instance Zipper LoopedZip where
       (x :< xs) = viewl conts
       (ys :> y) = viewr conts
 
+  -- | Obtains neighbors by indexing both ends of a sequence
   neighbors (LoopedZip _ conts)
     | S.length conts <=   2 = toList conts
     | otherwise = map (S.index conts) [0, S.length conts - 1]
+
+  flatten (LoopedZip foc conts) = foc : toList conts
 
 
 instance Functor LoopedZip where
@@ -78,12 +82,13 @@ instance Zipper GZ where
     where
     neighbors' z = (z^.focus) : neighbors z
 
+  flatten (GridZip (LoopedZip foc conts)) = flatten foc ++ concatMap flatten (toList conts)
+
+
 matrixToGZip :: [[a]] -> GZ a
 matrixToGZip = GridZip . g . map g
-  where 
+  where
     g [] = error "Empty matrix"
     g (x:xs) = LoopedZip x $ S.fromList xs
 -- Grid Zip <End> -------------------------------------
-
-
 

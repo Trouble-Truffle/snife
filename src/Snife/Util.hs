@@ -14,3 +14,5 @@ compose = foldr (.) id
 composeN :: Int -> (a -> a) -> (a -> a)
 composeN n = compose . replicate n
 
+
+

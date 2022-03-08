@@ -9,6 +9,7 @@ import Snife.Draw
 import Snife.Event
 import Snife.Theme
 
+import Data.Zipper
 app :: App Game Tick Name
 app = App {
     appDraw = drawUI
@@ -20,7 +21,11 @@ app = App {
 
 initialGame :: Game
 initialGame =  Game {
-    _board = [[]]
+    _board = matrixToGZip [
+        [Dead, Dead,  Dead,   Dead, Dead] 
+      , [Dead, Alive, Alive,  Alive, Dead] 
+      , [Dead, Dead,  Dead,   Dead, Dead] 
+      ]
   , _speed = 1
   , _pause = True
 

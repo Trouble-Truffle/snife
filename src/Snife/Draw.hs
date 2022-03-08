@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 module Snife.Draw where
 
 import Snife.Types
@@ -6,4 +7,8 @@ import Brick.Widgets.Center
 
 import Control.Lens
 drawUI :: Game -> [Widget Name]
-drawUI game = [center $ str $ show $ game ^. score]
+drawUI game = [center $ renderCells $ game ^. board]
+
+renderCells :: Board -> Widget Name
+renderCells = undefined
+

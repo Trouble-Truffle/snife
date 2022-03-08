@@ -6,9 +6,11 @@ import Brick
 import Control.Lens
 import qualified Data.Sequence as S
 
+import Data.Zipper
+
 data Tick = Tick
 
-type Board = [[Int]]
+type Board = GZ CellState
 
 -- | For infinite length sequences
 data Stream a = a :| Stream a
