@@ -5,9 +5,9 @@ module Snife.Types where
 import Brick
 import Control.Lens
 import qualified Data.Sequence as S
+import Control.Concurrent.STM.TVar
 
 import Data.Zipper
-
 data Tick = Tick
 
 type Board = GZ CellState
@@ -23,7 +23,12 @@ type Coord = (Int,Int)
 data SnakeSegment = Vertical | Horizontal | UpLeft | UpRight | DownLeft | DownRight | Head
 type Snake = S.Seq (SnakeSegment, Coord)
 
-data CellState = Alive | Dead | Transition | Snake deriving Show
+data CellState = Alive | Dead | Transition | Snake deriving (Eq)
+instance Show CellState where
+  show Alive = "X"
+  show Dead = " "
+  show Transition = ":"
+  show Snake = "%"
 type LiveCells = S.Seq (CellState, Coord)
 
 data Difficulty = Easy | Medium | Hard
@@ -35,6 +40,7 @@ data SnifeLenTheme = Early | Mid | Late
 data Game =  Game {
     _board :: Board
   , _speed :: Float
+  , _tval :: TVar Int -- The multhithreaded variable for delays
   , _pause :: Bool
 
   , _snake :: Snake

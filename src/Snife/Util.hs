@@ -8,6 +8,10 @@ floatToDelay = floor . (* fromIntegral initialSpeed)
 initialSpeed :: Int
 initialSpeed = 1000000
 
+-- | The increment/decrement when  changing speeds
+speedIncrement :: Float
+speedIncrement = 0.1
+
 compose :: [a -> a] -> (a -> a)
 compose = foldr (.) id
 

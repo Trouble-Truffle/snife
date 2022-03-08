@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeFamilies, TemplateHaskell, TypeApplications, FlexibleInstances, OverloadedLists #-}
+{-# LANGUAGE TypeFamilies, TemplateHaskell, TypeApplications, FlexibleInstances, OverloadedLists, LambdaCase #-}
 module Data.Zipper where
 
 import qualified Data.Sequence as S
@@ -8,6 +8,7 @@ import Control.Comonad
 
 import Snife.Util
 
+import Data.Tuple
 import Control.Monad
 import Data.Foldable
 import Data.List
@@ -114,7 +115,7 @@ instance Comonad GZ where
                 (S.fromFunction (pred ySize) (`mkRow` zx))
                 (zx ^. (unZip . focus . index))
       where
-        zx =  composeN (i+1) (shift W) zipper
+        zx =  composeN (i+1) (shift E) zipper
 
     (xSize,ySize) = (succ . S.length $ zipper ^. (unZip . conts),
                      succ . S.length $ zipper ^. (unZip . focus . conts))

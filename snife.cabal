@@ -33,10 +33,12 @@ library
     Snife.Util
 
   build-depends:
-    , base        ^>=4.14.3.0
+    , base          ^>=4.14.3.0
     , brick
     , containers
     , lens
+    , stm
+    , transformers
     , vty
 
   hs-source-dirs:   src
@@ -45,12 +47,13 @@ library
 executable snife
   main-is:          Main.hs
   build-depends:
-    , base        ^>=4.14.3.0
+    , base          ^>=4.14.3.0
     , brick
     , containers
     , lens
     , snife
     , stm
+    , transformers
     , vty
 
   hs-source-dirs:   app

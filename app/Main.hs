@@ -1,3 +1,5 @@
+{-# LANGUAGE LambdaCase #-}
+
 module Main where
 
 import qualified Brick.BChan as BC
@@ -22,4 +24,8 @@ main = do
 
   let mVty = V.mkVty V.defaultConfig
   vty <- mVty
-  void $ B.customMain vty mVty (Just chan) SI.app SI.initialGame
+
+  initialGame <- SI.initialGame tvar
+  void $ B.customMain vty mVty (Just chan) SI.app initialGame
+
+
