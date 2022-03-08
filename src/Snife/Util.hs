@@ -8,3 +8,9 @@ floatToDelay = floor . (* fromIntegral initialSpeed)
 initialSpeed :: Int
 initialSpeed = 1000000
 
+compose :: [a -> a] -> (a -> a)
+compose = foldr (.) id
+
+composeN :: Int -> (a -> a) -> (a -> a)
+composeN n = compose . replicate n
+
