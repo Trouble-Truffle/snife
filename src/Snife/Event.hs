@@ -5,6 +5,7 @@ import Snife.Types
 import Control.Lens
 import Graphics.Vty
 import Control.Concurrent.STM.TVar
+import Brick.Util
 
 import Control.Monad.IO.Class
 import GHC.Conc.Sync
@@ -32,6 +33,6 @@ step = co_bind rule
 
 handleSpeed :: Game -> (Float -> Float -> Float) -> EventM Name (Next Game)
 handleSpeed game (+/-) = do
-  let newSpeed = (game^.speed) +/- speedIncrement
+  let newSpeed = (\x -> if x <= 0.1 then 0.1 else x ) (game^.speed) +/- speedIncrement
   liftIO $ atomically $ writeTVar (game^.tval) (floatToDelay newSpeed)
   continue $ game & speed .~ newSpeed
