@@ -22,7 +22,7 @@ app = App {
   }
 
 sampleBoard = matrixToGZip $ (map . map) (\case ' ' -> Dead; _ -> Alive)  
-          [
+       [
             "                                                                                          "
           , "                                                                                          "
           , "                                                                                          "

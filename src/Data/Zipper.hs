@@ -23,6 +23,7 @@ class Zipper z where
   neighbors :: z a -> [a]
   flatten :: z a -> [a] -- Turn the content and focus into just one list
   (<!>) :: z a -> Data.Zipper.Index z -> a -- No fail state as the list is looping
+  merge :: (a -> a -> a) -> z a -> z a -> z a
 
 -- Looped Zip <Begin> -----------------------------------
 data LoopedZip a = LoopedZip {
@@ -65,6 +66,13 @@ instance Zipper LoopedZip where
       index = index' `mod` succ (S.length conts)
 
 
+  merge oper (LoopedZip focl contl il ) (LoopedZip focr contr ir) = 
+    LoopedZip
+      (focl `oper` focr)
+      (S.zipWith oper contl contr)
+      (il + ir `div` 2)
+
+
 instance Functor LoopedZip where
   fmap f (LoopedZip foc conts i) = LoopedZip (f foc) (fmap f conts) i
 
@@ -103,6 +111,11 @@ instance Zipper GZ where
   flatten (GridZip (LoopedZip foc conts _)) = flatten foc ++ concatMap flatten (toList conts)
 
   (GridZip zipper) <!> (xIndex,yIndex) = (<!> xIndex) $ zipper <!> yIndex
+
+  merge oper (GridZip (LoopedZip foc_L cont_L i_L)) (GridZip (LoopedZip foc_R cont_R i_R)) = GridZip $ LoopedZip
+    (merge oper foc_L foc_R)
+    (S.zipWith (merge oper) cont_L cont_R)
+    (i_L + i_R `div` 2)
 
 
 instance Functor GZ where
