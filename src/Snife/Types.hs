@@ -36,6 +36,11 @@ data Difficulty = Easy | Medium | Hard
 data SnifeDifTheme = EasyT | MediumT | HardT
 data SnifeLenTheme = Early | Mid | Late
 
+data DebugInfo = DebugInfo {
+    _draw :: Bool
+  , _curTick :: Int
+  }
+makeLenses ''DebugInfo
 
 data Game =  Game {
     _board :: Board
@@ -54,6 +59,7 @@ data Game =  Game {
   , _difficulty :: Difficulty
   , _difTheme :: SnifeDifTheme
   , _lenTheme :: SnifeLenTheme
+  , _debug :: DebugInfo
   }
 
 makeLenses ''Game

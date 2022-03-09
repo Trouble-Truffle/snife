@@ -11,5 +11,20 @@ class Functor w => Comonad w where
 
   {-# MINIMAL co_return, (co_join | co_bind) #-}
 
+
+-- | alias for `co_bind`
+(<<=):: Comonad w => (w a -> b) -> w a -> w b
+(<<=) = co_bind
+
+-- | alias for `flip co_bind`
 (=>>) :: Comonad w => w a -> (w a -> b) -> w b
 (=>>) = flip co_bind
+
+
+-- | Alias for `co_join`
+duplicate :: Comonad w => w a -> w (w a)
+duplicate = co_join
+
+-- | Alias for `co_return`
+extract :: Comonad w => w a -> a
+extract = co_return

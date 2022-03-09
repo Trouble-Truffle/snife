@@ -22,6 +22,7 @@ class Zipper z where
   shift :: Direction z -> z a -> z a
   neighbors :: z a -> [a]
   flatten :: z a -> [a] -- Turn the content and focus into just one list
+  (<!>) :: z a -> Data.Zipper.Index z -> a -- No fail state as the list is looping
 
 -- Looped Zip <Begin> -----------------------------------
 data LoopedZip a = LoopedZip {
@@ -30,6 +31,7 @@ data LoopedZip a = LoopedZip {
   , _index :: Int
   }
 makeLenses ''LoopedZip
+
 instance Show a => Show (LoopedZip a)  where
   show (LoopedZip foc conts index) = ("  [" ++ show foc ++ "]") ++ concat ( toList $ S.intersperse "," $ fmap show conts) ++ ("(" ++ show index ++ ")")
 
@@ -42,8 +44,8 @@ instance Zipper LoopedZip where
     if null conts
       then zip
       else case direction of
-        L -> LoopedZip x (xs |> foc) $ pred index `mod` size
-        R -> LoopedZip y (foc <| ys) $ succ index `mod` size
+        L -> LoopedZip x (xs |> foc) $ succ index `mod` size
+        R -> LoopedZip y (foc <| ys) $ index `mod` size
     where
       size = 1 + S.length conts
       (x :< xs) = viewl conts
@@ -55,6 +57,12 @@ instance Zipper LoopedZip where
     | otherwise = map (S.index conts) [0, S.length conts - 1]
 
   flatten (LoopedZip foc conts _) = foc : toList conts
+
+  (LoopedZip foc conts _ ) <!> index'
+    | index == 0 = foc
+    | otherwise = conts `S.index` pred index
+    where
+      index = index' `mod` succ (S.length conts)
 
 
 instance Functor LoopedZip where
@@ -94,6 +102,8 @@ instance Zipper GZ where
 
   flatten (GridZip (LoopedZip foc conts _)) = flatten foc ++ concatMap flatten (toList conts)
 
+  (GridZip zipper) <!> (xIndex,yIndex) = (<!> xIndex) $ zipper <!> yIndex
+
 
 instance Functor GZ where
   fmap f = GridZip . (fmap . fmap) f . _unZip
@@ -101,7 +111,7 @@ instance Functor GZ where
 instance Comonad GZ where
   co_return =  _focus . _focus . _unZip
   co_join zipper = GridZip $ LoopedZip
-    (LoopedZip 
+    (LoopedZip
       zipper
       (S.fromFunction (ySize - 1) (`mkRow` zipper))
       y
@@ -110,7 +120,7 @@ instance Comonad GZ where
     x
     where
     mkRow j = composeN (j+1) (shift S)
-    mkCol i = LoopedZip   
+    mkCol i = LoopedZip
                 zx
                 (S.fromFunction (pred ySize) (`mkRow` zx))
                 (zx ^. (unZip . focus . index))
@@ -119,7 +129,7 @@ instance Comonad GZ where
 
     (xSize,ySize) = (succ . S.length $ zipper ^. (unZip . conts),
                      succ . S.length $ zipper ^. (unZip . focus . conts))
-    (x,y) = (zipper ^. (unZip . index), 
+    (x,y) = (zipper ^. (unZip . index),
             zipper ^. (unZip . focus . index))
 
 matrixToGZip :: [[a]] -> GZ a

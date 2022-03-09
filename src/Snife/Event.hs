@@ -16,6 +16,7 @@ import Snife.Util
 
 eventHandler :: Game -> BrickEvent Name Tick -> EventM Name (Next Game)
 eventHandler game (VtyEvent (EvKey (KChar 'q') [])) = halt game
+eventHandler game (VtyEvent (EvKey (KChar 't') [])) = continue $ game & debug %~ (draw %~ not)
 eventHandler game (VtyEvent (EvKey (KChar 'w') [])) = handleSpeed game (-)
 eventHandler game (VtyEvent (EvKey (KChar 's') [])) = handleSpeed game (+)
 eventHandler game (AppEvent Tick) = continue $ game & board %~ step
