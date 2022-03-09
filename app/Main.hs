@@ -1,5 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
-
 module Main where
 
 import qualified Brick.BChan as BC

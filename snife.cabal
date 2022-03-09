@@ -25,6 +25,7 @@ library
   exposed-modules:
     Control.Comonad
     Data.Zipper
+    Data.LoopList
     Snife.Draw
     Snife.Event
     Snife.Init
