@@ -152,3 +152,5 @@ matrixToGZip = GridZip . g . map g
     g (x:xs) = LoopedZip x (S.fromList xs) 0
 -- Grid Zip <End> -------------------------------------
 
+
+

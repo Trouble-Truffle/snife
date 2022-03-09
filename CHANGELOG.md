@@ -2,4 +2,5 @@
 
 ## 0.1.0.0 -- YYYY-mm-dd
 
-* First version. Released on an unsuspecting world.
+* First version.
+  Zippers and Comonads may not have been the most efficient solution
