@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeFamilies, ViewPatterns, OverloadedLists #-}
+{-# LANGUAGE TypeFamilies, ViewPatterns, OverloadedLists, AllowAmbiguousTypes #-}
 
 module Data.LoopList where
 import           Control.Applicative
@@ -21,6 +21,15 @@ class Foldable l => Loopable l where
   type Index l
 
   loopIndex :: l a -> Index l -> a
+
+  normalize :: Index l -> l a -> Index l
+
+  -- | Replace at index
+  replace :: l a -> Index l -> a -> l a
+
+  -- | Apply function at index
+  apply :: l a -> Index l -> (a -> a) -> l a
+
   shift :: Direction l -> l a -> l a
 
   -- | Does one permutaion for every shift 
@@ -35,7 +44,9 @@ instance Loopable Seq where
   type Index Seq = Int
   data Direction Seq = L | R
 
-  loopIndex seq i = S.index seq (i `mod` S.length seq)
+  loopIndex seq i = S.index seq (normalize i seq)
+
+  normalize i xs = i `mod` S.length xs
 
   shift dir seq = if S.null seq
     then seq
@@ -47,6 +58,9 @@ instance Loopable Seq where
     (ys :> y ) = S.viewr seq
 
   neighbors = sequence [shift L, shift R]
+
+  replace xs i x  = S.update (normalize i xs) x xs
+  apply xs i f = S.adjust f (normalize i xs) xs
 
   permutations seq = S.fromFunction (S.length seq)
                                     (\x -> composeN x (shift L) seq)
@@ -116,6 +130,18 @@ instance Loopable Matrix where
   type Index Matrix = (Int, Int)
 
   loopIndex matrix (x, y) = loopIndex (loopIndex (fromMatrix matrix) y) x
+
+  normalize (x,y) xs = (normalize x $ S.take 1 $ fromMatrix xs,
+                        normalize x $ fromMatrix xs)
+
+  replace NullMatrix _ _ = NullMatrix
+  replace (Matrix xs) (x,y) a = Matrix $ S.adjust (S.update x a) y xs
+
+  apply NullMatrix _ _ = NullMatrix
+  apply (Matrix xs) (x,y) f = Matrix $ S.adjust (S.adjust f x) y xs
+
+  
+
   shift N = Matrix . shift L . fromMatrix
   shift S = Matrix . shift R . fromMatrix
   shift E = Matrix . fmap (shift R) . fromMatrix

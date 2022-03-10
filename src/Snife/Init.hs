@@ -26,6 +26,7 @@ sampleBoard = Matrix $ fromList $ map
   (fromList
      . map
          (\case
+            'S' -> Snake
             ' ' -> Dead
             _ -> Alive))
   ["                                                                                          ",
@@ -49,7 +50,7 @@ sampleBoard = Matrix $ fromList $ map
    "                                                                                XX        ",
    "                                                                                XX        ",
    "                                                                                XX        ",
-   "                                                                                XX        ",
+   "                       SSSSSSSSSSSSSSSSSSSSSs                                   XX        ",
    "                                                                                XX        ",
    "                                                                                XX        ",
    "                                           X                                    XX        ",
@@ -99,5 +100,5 @@ initialGame tvar =  return Game {
   , _difficulty = Easy
   , _difTheme = EasyT
   , _lenTheme = Early
-  , _debug = DebugInfo False 0
+  , _debug = DebugInfo True 0
   }
