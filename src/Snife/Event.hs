@@ -12,9 +12,8 @@ import Control.Monad.IO.Class
 import GHC.Conc.Sync
 
 import Control.Monad
-import Control.Comonad
-import Data.Zipper
 import Snife.Util
+import Data.LoopList
 
 eventHandler :: Game -> BrickEvent Name Tick -> EventM Name (Next Game)
 eventHandler game (VtyEvent (EvKey (KChar 'q') [])) = halt game
@@ -24,18 +23,15 @@ eventHandler game (VtyEvent (EvKey (KChar 's') [])) = handleSpeed game (+)
 eventHandler game (AppEvent Tick) = continue $ game & board %~ step
 eventHandler game event = continue $ game & score %~ (+1)
 
--- | equivalent to the one line APL Game of Life
+-- equivalent to the one line APL Game of Life
 step :: Board -> Board
 step board' = fmap (\case; True -> Alive; _ -> Dead)
-  . foldr1 (merge (||))
-  . zipWith ($) [id, merge (&&) (fmap toEnum board)]
-  . sequence [fmap (==3), fmap (==4)]
-  . foldr1 (merge (+))
-  . join
-  . map (sequence [shift N, id, shift S])
-  . sequence [shift E, id, shift W]  $ board
+   $ foldr1 (merge (||))
+   $ zipWith ($) [id, merge (&&) (fmap toEnum board)]
+   $ sequence [fmap (==3), fmap (==4)]
+   $ foldr1 (merge (+)) $ neighbors board
   where
-    board = (\case; Alive -> 1; _ -> 0) <$> board'
+    board = (\case; Alive -> 1; _ -> 0) <$> board' :: Matrix Int
 
 handleSpeed :: Game -> (Float -> Float -> Float) -> EventM Name (Next Game)
 handleSpeed game (+/-) = do

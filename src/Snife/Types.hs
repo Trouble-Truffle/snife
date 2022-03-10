@@ -7,10 +7,11 @@ import Control.Lens
 import qualified Data.Sequence as S
 import Control.Concurrent.STM.TVar
 
-import Data.Zipper
+import Data.LoopList 
+
 data Tick = Tick
 
-type Board = GZ CellState
+type Board = Matrix CellState
 
 -- | For infinite length sequences
 data Stream a = a :| Stream a

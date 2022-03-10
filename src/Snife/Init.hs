@@ -11,7 +11,8 @@ import Snife.Types
 import Snife.Draw
 import Snife.Event
 import Snife.Theme
-import Data.Zipper
+import Data.LoopList
+
 app :: App Game Tick Name
 app = App {
     appDraw = drawUI
@@ -21,62 +22,65 @@ app = App {
   , appAttrMap = themeGenerator
   }
 
-sampleBoard = matrixToGZip $ (map . map) (\case ' ' -> Dead; _ -> Alive)  
-       [
-            "                                                                                          "
-          , "                                                                                          "
-          , "                                                                                          "
-          , "                                                                                XX        "
-          , "                                                                                XX        "
-          , "                                                                                XX        "
-          , "                                                                                XX        "
-          , "                                                                                XX        "
-          , "                                                                                XX        "
-          , "                                           X                                    XX        "
-          , "                                         X X                                    XX        "
-          , "                               XX      XX             XX                        XX        "
-          , "                              X   X    XX             XX                        XX        "
-          , "                   XX        X     X   XX                                       XX        "
-          , "                   XX        X   X XX    X X                                    XX        "
-          , "                             X     X       X                                    XX        "
-          , "                              X   X                                             XX        "
-          , "                               XX                                               XX        "
-          , "                                                                                XX        "
-          , "                                                                                XX        "
-          , "                                                                                XX        "
-          , "                                                                                XX        "
-          , "                                                                                XX        "
-          , "                                                                                XX        "
-          , "                                           X                                    XX        "
-          , "                                         X X                                    XX        "
-          , "                               XX      XX             XX                        XX        "
-          , "                              X   X    XX             XX                        XX        "
-          , "                   XX        X     X   XX                                       XX        "
-          , "                   XX        X   X XX    X X                                    XX        "
-          , "                             X     X       X                                    XX        "
-          , "                              X   X                                             XX        "
-          , "                               XX                                               XX        "
-          , "                                                                                XX        "
-          , "                                                                                XX        "
-          , "                                                                                XX        "
-          , "                                                                                XX        "
-          , "                                                                                XX        "
-          , "                                                                                XX        "
-          , "                                                                                          "
-          , "                                                                                          "
-          , "                                                                                          "
-          , "                                                                                          "
-          , "                                                                                          "
-          , "                                                                                          "
-          , "                                                                                          "
-          , "                                                       XX                                 "
-          , "                                                       XX                                 "
-          , "                                                                                          "
-          , "                                                                                          "
-          , "                                                                                          "
-          , "                                                                                          "
-          , "                                                                                          "
-          ]
+sampleBoard = Matrix $ fromList $ map
+  (fromList
+     . map
+         (\case
+            ' ' -> Dead
+            _ -> Alive))
+  ["                                                                                          ",
+   "                                                                                          ",
+   "                                                                                          ",
+   "                                                                                XX        ",
+   "                                                                                XX        ",
+   "                                                                                XX        ",
+   "                                                                                XX        ",
+   "                                                                                XX        ",
+   "                                                                                XX        ",
+   "                                           X                                    XX        ",
+   "                                         X X                                    XX        ",
+   "                               XX      XX             XX                        XX        ",
+   "                              X   X    XX             XX                        XX        ",
+   "                   XX        X     X   XX                                       XX        ",
+   "                   XX        X   X XX    X X                                    XX        ",
+   "                             X     X       X                                    XX        ",
+   "                              X   X                                             XX        ",
+   "                               XX                                               XX        ",
+   "                                                                                XX        ",
+   "                                                                                XX        ",
+   "                                                                                XX        ",
+   "                                                                                XX        ",
+   "                                                                                XX        ",
+   "                                                                                XX        ",
+   "                                           X                                    XX        ",
+   "                                         X X                                    XX        ",
+   "                               XX      XX             XX                        XX        ",
+   "                              X   X    XX             XX                        XX        ",
+   "                   XX        X     X   XX                                       XX        ",
+   "                   XX        X   X XX    X X                                    XX        ",
+   "                             X     X       X                                    XX        ",
+   "                              X   X                                             XX        ",
+   "                               XX                                               XX        ",
+   "                                                                                XX        ",
+   "                                                                                XX        ",
+   "                                                                                XX        ",
+   "                                                                                XX        ",
+   "                                                                                XX        ",
+   "                                                                                XX        ",
+   "                                                                                          ",
+   "                                                                                          ",
+   "                                                                                          ",
+   "                                                                                          ",
+   "                                                                                          ",
+   "                                                                                          ",
+   "                                                                                          ",
+   "                                                       XX                                 ",
+   "                                                       XX                                 ",
+   "                                                                                          ",
+   "                                                                                          ",
+   "                                                                                          ",
+   "                                                                                          ",
+   "                                                                                          "]
 initialGame :: TVar Int -> IO Game
 initialGame tvar =  return Game {
     _board = sampleBoard
