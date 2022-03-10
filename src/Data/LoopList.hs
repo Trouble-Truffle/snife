@@ -1,6 +1,8 @@
 {-# LANGUAGE TypeFamilies, ViewPatterns, OverloadedLists #-}
 
 module Data.LoopList where
+import           Control.Applicative
+import           Control.Lens                   ( from )
 import           Control.Monad
 import qualified Data.Foldable                 as F
 import           Data.Function
@@ -12,9 +14,7 @@ import           Data.Sequence                  ( (<|)
                                                 , ViewR(..)
                                                 , (|>)
                                                 )
-import GHC.Exts
-import Control.Applicative
-import Control.Lens (from)
+import           GHC.Exts
 
 class Foldable l => Loopable l where
   data Direction l
@@ -48,16 +48,17 @@ instance Loopable Seq where
 
   neighbors = sequence [shift L, shift R]
 
-  permutations seq = S.fromFunction (S.length seq) (\x -> composeN x (shift L) seq)
-    where
-      composeN n = foldr (.) id . replicate n
+  permutations seq = S.fromFunction (S.length seq)
+                                    (\x -> composeN x (shift L) seq)
+    where composeN n = foldr (.) id . replicate n
 
 data Matrix a = Matrix { fromMatrix :: Seq (Seq a)} | NullMatrix
 
 instance Show a => Show (Matrix a) where
   show NullMatrix = "| |"
-  show matrix     = unlines $ F.concatMap addLine $ fmap (F.concat . S.intersperse "|")
-                                              (fromMatrix $ fmap respace matrix)
+  show matrix     = unlines $ F.concatMap addLine $ fmap
+    (F.concat . S.intersperse "|")
+    (fromMatrix $ fmap respace matrix)
    where
 
     addLine :: String -> [String]
@@ -90,14 +91,14 @@ instance Foldable Matrix where
 
 instance Applicative Matrix where
   pure = Matrix . S.singleton . S.singleton
-  liftA2 _ a NullMatrix = NullMatrix
-  liftA2 _ NullMatrix b = NullMatrix
-  liftA2 f a b = Matrix $ (S.zipWith . S.zipWith) f (fromMatrix a) (fromMatrix b)
+  liftA2 _ a          NullMatrix = NullMatrix
+  liftA2 _ NullMatrix b          = NullMatrix
+  liftA2 f a b =
+    Matrix $ (S.zipWith . S.zipWith) f (fromMatrix a) (fromMatrix b)
 
 instance Monad Matrix where
   NullMatrix >>= f = NullMatrix
-  (Matrix x) >>= f = foldr (|^|) mempty
-    $ fmap (F.foldr (<>) mempty . fmap f) x
+  (Matrix x) >>= f = foldr (|^|) mempty $ fmap (F.foldr (<>) mempty . fmap f) x
 
 instance Traversable Matrix where
   traverse f xs = Matrix <$> traverse sequenceA (fromMatrix $ fmap f xs)
@@ -107,7 +108,7 @@ instance IsList (Matrix a) where
   fromList [] = NullMatrix
   fromList xs = Matrix $ S.singleton $ S.fromList xs
 
-  toList NullMatrix = []
+  toList NullMatrix  = []
   toList (Matrix xs) = F.toList $ F.foldr (<>) S.empty xs
 
 instance Loopable Matrix where
@@ -121,32 +122,32 @@ instance Loopable Matrix where
   shift W = Matrix . fmap (shift L) . fromMatrix
 
   neighbors NullMatrix = return NullMatrix
-  neighbors xs = sequence [shift N, id, shift S] =<< sequence [shift W, id, shift E] xs
+  neighbors xs =
+    sequence [shift N, id, shift S] =<< sequence [shift W, id, shift E] xs
 
-  permutations NullMatrix = return NullMatrix
-  permutations (Matrix xs)= Matrix xss
-    where
-      xss = (fmap . fmap) Matrix $ permutations <$> fmap permutations xs
+  permutations NullMatrix  = return NullMatrix
+  permutations (Matrix xs) = Matrix xss
+    where xss = (fmap . fmap) Matrix $ permutations <$> fmap permutations xs
 
 horizontalConcat, verticalConcat :: Matrix a -> Matrix a -> Matrix a
 horizontalConcat = (<>)
-verticalConcat NullMatrix d = d
-verticalConcat u NullMatrix = u
+verticalConcat NullMatrix d          = d
+verticalConcat u          NullMatrix = u
 verticalConcat (Matrix u) (Matrix d) = Matrix $ u <> d
 
 sampleMatrix :: Matrix Int
-sampleMatrix = Matrix $ S.fromList [
-    S.fromList [1,2,3]
-  , S.fromList [1,2,3]
-  , S.fromList [1,2,3]
-  , S.fromList [4,5,6]
-  , S.fromList [7,8,9]
+sampleMatrix = Matrix $ S.fromList
+  [ S.fromList [1, 2, 3]
+  , S.fromList [1, 2, 3]
+  , S.fromList [1, 2, 3]
+  , S.fromList [4, 5, 6]
+  , S.fromList [7, 8, 9]
   ]
 
 -- | Add a character to every left side of the matrix
 (|:|) :: a -> Matrix a -> Matrix a
-x |:| NullMatrix = pure x
-x |:| (Matrix xs) = Matrix $ fmap (x<|) xs
+x |:| NullMatrix  = pure x
+x |:| (Matrix xs) = Matrix $ fmap (x <|) xs
 
 -- | Does a horizontal concatination
 (<||) :: Matrix a -> Matrix a -> Matrix a
@@ -154,13 +155,12 @@ x |:| (Matrix xs) = Matrix $ fmap (x<|) xs
 
 -- | Does a vertical concatination
 (|^|) :: Matrix a -> Matrix a -> Matrix a
-(|^|) NullMatrix b = b
-(|^|) a NullMatrix = a
-(|^|) a b = Matrix $ fromMatrix a <> fromMatrix b
+(|^|) NullMatrix b          = b
+(|^|) a          NullMatrix = a
+(|^|) a          b          = Matrix $ fromMatrix a <> fromMatrix b
 
 merge :: (a -> a -> a) -> Matrix a -> Matrix a -> Matrix a
-merge _ NullMatrix NullMatrix = NullMatrix
-merge _ NullMatrix mat_R  = mat_R
-merge _ mat_L NullMatrix = mat_L
-merge oper mat_L mat_R = liftA2 oper mat_L mat_R
-
+merge _    NullMatrix NullMatrix = NullMatrix
+merge _    NullMatrix mat_R      = mat_R
+merge _    mat_L      NullMatrix = mat_L
+merge oper mat_L      mat_R      = liftA2 oper mat_L mat_R
