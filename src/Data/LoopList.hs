@@ -4,8 +4,14 @@ module Data.LoopList where
 import           Control.Monad
 import qualified Data.Foldable                 as F
 import           Data.Function
-import  qualified          Data.Sequence                 as S
-import Data.Sequence (Seq, ViewR(..), ViewL(..), (><), (|>), (<|))
+import qualified Data.Sequence                 as S
+import           Data.Sequence                  ( (<|)
+                                                , (><)
+                                                , Seq
+                                                , ViewL(..)
+                                                , ViewR(..)
+                                                , (|>)
+                                                )
 
 class Foldable l => Loopable l where
   data Direction l
@@ -44,16 +50,17 @@ data Matrix a = Matrix { fromMatrix :: Seq (Seq a)} | NullMatrix
 
 instance Show a => Show (Matrix a) where
   show NullMatrix = "| |"
-  show matrix = unlines $ F.toList $
-    fmap (F.concat . S.intersperse "|") (fromMatrix $ fmap respace matrix)
+  show matrix     = unlines $ F.toList $ fmap (F.concat . S.intersperse "|")
+                                              (fromMatrix $ fmap respace matrix)
    where
 
    -- Normalizes the size of all strings in the grid
     respace :: Show a => a -> String
-    respace (show -> str) = let (lSpc, rSpc) = getLR $ length str
-        in replicate lSpc ' ' ++ str ++ replicate rSpc ' '
+    respace (show -> str) =
+      let (lSpc, rSpc) = getLR $ length str
+      in  replicate lSpc ' ' ++ str ++ replicate rSpc ' '
 
-    getLR size = (\(a,b) -> (a, a + b)) $ (maxLen - size) `divMod` 2
+    getLR size = (\(a, b) -> (a, a + b)) $ (maxLen - size) `divMod` 2
 
     maxLen = maximum $ fmap (F.length . show) $ join $ fromMatrix matrix
 
@@ -83,11 +90,7 @@ instance Loopable Matrix where
   shift W = Matrix . fmap (shift L) . fromMatrix
 
 instance Mergeable Matrix where
-  merge oper mat_L mat_R = Matrix $ ((merge . merge) oper `on` fromMatrix) mat_L mat_R
+  merge oper mat_L mat_R =
+    Matrix $ ((merge . merge) oper `on` fromMatrix) mat_L mat_R
 
-samplMatrix = Matrix [
-    [1,2,3]
-  , [2,3,4]
-  , [4,1,6]
-  ]
-
+samplMatrix = Matrix [[1, 2, 3], [2, 3, 4], [4, 1, 6]]
